@@ -1,36 +1,45 @@
-#include <cstdio>
-#include <windows.h>
 #include <stdio.h>
-// 関数テンプレート
-template <typename Type>
-Type Min(Type a, Type b) {
-    return (a < b) ? a : b;
-}
 
-// char型の特殊化
-template <>
-char Min<char>(char a, char b) {
-    printf("数字以外は代入できません\n");
-    return (a < b) ? a : b;
-}
+
+// 再帰的な賃金体系の時給計算関数
+int RecursiveWage(int n) {
+    if (n == 1) {
+        return 100;
+    }
+
+    return RecursiveWage(n - 1) * 2 - 50;
+    }
+
 
 int main() {
-    int i1 = 10;
-    int i2 = 20;
+    int hour;
+    int normalTotal;
+    int recursiveTotal = 0;
 
-    float f1 = 3.141592f;
-    float f2 = 3.711111f;
+    printf("働く時間を入力してください：");
+    scanf_s("%d", &hour);
 
-    double d1 = 8.88;
-    double d2 = 9.99;
+    // 一般的な賃金体系の合計
+    normalTotal = 1072 * hour;
 
-    char c1 = 'Z';
-    char c2 = 'A';
+    // 再帰的な賃金体系の合計
+    for (int i = 1; i <= hour; i++) {
+        recursiveTotal += RecursiveWage(i);
+    }
 
-    printf("int型の最小値: %d\n", Min(i1, i2));
-    printf("float型の最小値: %f\n", Min(f1, f2));
-    printf("double型の最小値: %lf\n", Min(d1, d2));
-    printf("char型の最小値: %c\n", Min(c1, c2));
+    printf("\n%d時間働いた場合\n", hour);
+    printf("一般的な賃金体系：%d円\n", normalTotal);
+    printf("再帰的な賃金体系：%d円\n", recursiveTotal);
+
+    if (normalTotal < recursiveTotal) {
+        printf("再帰的な賃金体系のほうが稼げます。\n");
+    }
+    else if (normalTotal > recursiveTotal) {
+        printf("一般的な賃金体系のほうが稼げます。\n");
+    }
+    else {
+        printf("同じ金額です。\n");
+    }
 
     return 0;
 }
