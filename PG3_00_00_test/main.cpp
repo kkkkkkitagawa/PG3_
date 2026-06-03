@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+
 // 再帰的な賃金体系の時給計算関数
 int RecursiveWage(int n) {
     if (n == 1) {
@@ -7,7 +8,8 @@ int RecursiveWage(int n) {
     }
 
     return RecursiveWage(n - 1) * 2 - 50;
-}
+    }
+
 
 int main() {
     int hour;
