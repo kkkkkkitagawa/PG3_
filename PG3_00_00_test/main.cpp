@@ -1,8 +1,6 @@
 #include <cstdio>
 #include <windows.h>
 #include <stdio.h>
-#include <cctype>
-
 // 関数テンプレート
 template <typename Type>
 Type Min(Type a, Type b) {
@@ -12,9 +10,8 @@ Type Min(Type a, Type b) {
 // char型の特殊化
 template <>
 char Min<char>(char a, char b) {
-    char lowerA = static_cast<char>(std::tolower(static_cast<unsigned char>(a)));
-    char lowerB = static_cast<char>(std::tolower(static_cast<unsigned char>(b)));
-    return (lowerA < lowerB) ? a : b;
+    printf("数字以外は代入できません\n");
+    return (a < b) ? a : b;
 }
 
 int main() {
