@@ -17,19 +17,15 @@ int main() {
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);
 
-    int hour;
     int normalTotal = 0;
     int recursiveTotal = 0;
 
-    printf("働く時間を入力してください：");
-    scanf_s("%d", &hour);
-
-    printf("\n計算結果\n");
+    printf("1~8時間までの計算結果\n");
     printf("------------------------------------------\n");
     printf("時間\t一般的な賃金体系\t再帰的な賃金体系\n");
     printf("------------------------------------------\n");
 
-    for (int i = 1; i <= hour; i++) {
+    for (int i = 1; i <= 8; i++) {
         normalTotal = 1072 * i;
         recursiveTotal += RecursiveWage(i);
 
