@@ -1,4 +1,5 @@
 #include <chrono>
+#include <functional>
 #include <iostream>
 #include <limits>
 #include <random>
@@ -8,35 +9,31 @@
 #include <Windows.h>
 #endif
 
-// 判定結果を受け取る
-using ResultCallback = void (*)(int);
-
-void ShowCorrectResult(int diceResult)
+// 指定時間待ってから、受け取った関数を実行する。
+void SetTimeout(const std::function<void()>& callback, int milliseconds)
 {
-	std::cout << "\nサイコロの出目は " << diceResult << " です。\n";
-	std::cout << "正解\n";
-}
+	int remainingMilliseconds = milliseconds;
 
-void ShowIncorrectResult(int diceResult)
-{
-	std::cout << "\nサイコロの出目は " << diceResult << " です。\n";
-	std::cout << "不正解\n";
-}
+	while (remainingMilliseconds > 0) {
+		const int waitTime =
+			remainingMilliseconds >= 1000 ? 1000 : remainingMilliseconds;
 
-// 関数呼び出す
-void JudgeAnswer(
-	int diceResult,
-	int userAnswer,
-	ResultCallback onCorrect,
-	ResultCallback onIncorrect)
-{
-	const int correctAnswer = (diceResult % 2 == 0) ? 2 : 1;
-
-	if (userAnswer == correctAnswer) {
-		onCorrect(diceResult);
-	} else {
-		onIncorrect(diceResult);
+		std::this_thread::sleep_for(std::chrono::milliseconds(waitTime));
+		std::cout << "." << std::flush;
+		remainingMilliseconds -= waitTime;
 	}
+
+	std::cout << "\n";
+	callback();
+}
+
+int RollDice()
+{
+	static std::random_device randomDevice;
+	static std::mt19937 randomEngine(randomDevice());
+	std::uniform_int_distribution<int> dice(1, 6);
+
+	return dice(randomEngine);
 }
 
 int GetUserAnswer()
@@ -44,34 +41,16 @@ int GetUserAnswer()
 	int answer = 0;
 
 	while (true) {
-		std::cout << "出目は奇数と偶数のどちらでしょう？\n";
-		std::cout << "奇数なら 1、偶数なら 2 を入力してください: ";
+		std::cout << "出目が「丁（偶数）」か「半（奇数）」かを予想してください。\n";
+		std::cout << "半なら 1、丁なら 2 を入力: ";
 
 		if (std::cin >> answer && (answer == 1 || answer == 2)) {
 			return answer;
 		}
 
-		std::cout << "1 または 2 を入力してください。\n\n";
+		std::cout << "入力が正しくありません。1 または 2 を入力してください。\n\n";
 		std::cin.clear();
 		std::cin.ignore((std::numeric_limits<std::streamsize>::max)(), '\n');
-	}
-}
-
-int RollDice()
-{
-	std::random_device randomDevice;
-	std::mt19937 randomEngine(randomDevice());
-	std::uniform_int_distribution<int> dice(1, 6);
-	return dice(randomEngine);
-}
-
-void WaitForResult()
-{
-	std::cout << "判定中";
-
-	for (int i = 0; i < 3; ++i) {
-		std::this_thread::sleep_for(std::chrono::seconds(1));
-		std::cout << "." << std::flush;
 	}
 }
 
@@ -82,17 +61,30 @@ int main()
 	SetConsoleOutputCP(CP_UTF8);
 #endif
 
-	const int diceResult = RollDice();
+	std::cout << "=== 丁半博打 ===\n\n";
+
 	const int userAnswer = GetUserAnswer();
+	const int diceResult = RollDice();
 
-	WaitForResult();
+	std::cout << "\nサイコロを振りました。\n";
+	std::cout << "結果は" << std::flush;
 
-	// コールバック
-	JudgeAnswer(
-		diceResult,
-		userAnswer,
-		ShowCorrectResult,
-		ShowIncorrectResult);
+	// std::functionにラムダ式を代入する。
+	std::function<void()> showResult = [userAnswer, diceResult]() {
+		const bool isCho = diceResult % 2 == 0;
+		const int correctAnswer = isCho ? 2 : 1;
+
+		std::cout << "\nサイコロの出目は " << diceResult << " です。\n";
+		std::cout << "結果は「" << (isCho ? "丁（偶数）" : "半（奇数）") << "」です。\n";
+
+		if (userAnswer == correctAnswer) {
+			std::cout << "正解です！\n";
+		} else {
+			std::cout << "不正解です。\n";
+		}
+	};
+
+	SetTimeout(showResult, 3000);
 
 	return 0;
 }
