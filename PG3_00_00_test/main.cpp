@@ -20,12 +20,11 @@ int main() {
     int normalTotal = 0;
     int recursiveTotal = 0;
 
-    printf("1~8時間までの計算結果\n");
     printf("------------------------------------------\n");
     printf("時間\t一般的な賃金体系\t再帰的な賃金体系\n");
     printf("------------------------------------------\n");
 
-    for (int i = 1; i <= 8; i++) {
+    for (int i = 1; i <= 10; i++) {
         normalTotal = 1072 * i;
         recursiveTotal += RecursiveWage(i);
 
@@ -35,10 +34,10 @@ int main() {
     printf("------------------------------------------\n");
 
     if (normalTotal < recursiveTotal) {
-        printf("再帰的な賃金体系のほうが稼げます。\n");
+        printf("再帰的な賃金体系のほうが高い。\n");
     }
     else if (normalTotal > recursiveTotal) {
-        printf("一般的な賃金体系のほうが稼げます。\n");
+        printf("一般的な賃金体系のほうが高い。\n");
     }
     else {
         printf("同じ金額です。\n");
