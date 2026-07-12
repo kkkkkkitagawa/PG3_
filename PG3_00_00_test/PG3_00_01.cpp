@@ -1,20 +1,94 @@
-// PG3_00_00_test.cpp : このファイルには 'main' 関数が含まれています。プログラム実行の開始と終了がそこで行われます。
-//
-
 #include <iostream>
+#include <chrono>
+#include <thread>
+
+class Enemy {
+public:
+    void Update();
+    bool IsFinished() const;
+
+private:
+    enum class State {
+        Approach,
+        Shoot,
+        Leave,
+        Finished,
+        Count,
+    };
+
+    using StateFunc = void (Enemy::*)();
+
+    void Approach();
+    void Shoot();
+    void Leave();
+    void Finished();
+    void PrintTransitionDots() const;
+
+    static StateFunc spFuncTable[static_cast<int>(State::Count)];
+
+    State state_ = State::Approach;
+};
+
+Enemy::StateFunc Enemy::spFuncTable[static_cast<int>(Enemy::State::Count)] = {
+    &Enemy::Approach,
+    &Enemy::Shoot,
+    &Enemy::Leave,
+    &Enemy::Finished,
+};
+
+void Enemy::Update()
+{
+    StateFunc pFunc = spFuncTable[static_cast<int>(state_)];
+    (this->*pFunc)();
+}
+
+bool Enemy::IsFinished() const
+{
+    return state_ == State::Finished;
+}
+
+void Enemy::PrintTransitionDots() const
+{
+    using namespace std::chrono_literals;
+
+    for (int i = 0; i < 3; ++i) {
+        std::this_thread::sleep_for(500ms);
+        std::cout << "." << std::flush;
+    }
+
+    std::cout << "\n";
+}
+
+void Enemy::Approach()
+{
+    std::cout << "Enemy state: Approach\n";
+    PrintTransitionDots();
+    state_ = State::Shoot;
+}
+
+void Enemy::Shoot()
+{
+    std::cout << "Enemy state: Shoot\n";
+    PrintTransitionDots();
+    state_ = State::Leave;
+}
+
+void Enemy::Leave()
+{
+    std::cout << "Enemy state: Leave\n";
+    state_ = State::Finished;
+}
+
+void Enemy::Finished()
+{
+    std::cout << "Enemy state: Finished\n";
+}
 
 int main()
 {
-    std::cout << "群星の旅へ\n";
+    Enemy enemy;
+
+    while (!enemy.IsFinished()) {
+        enemy.Update();
+    }
 }
-
-// プログラムの実行: Ctrl + F5 または [デバッグ] > [デバッグなしで開始] メニュー
-// プログラムのデバッグ: F5 または [デバッグ] > [デバッグの開始] メニュー
-
-// 作業を開始するためのヒント: 
-//    1. ソリューション エクスプローラー ウィンドウを使用してファイルを追加/管理します 
-//   2. チーム エクスプローラー ウィンドウを使用してソース管理に接続します
-//   3. 出力ウィンドウを使用して、ビルド出力とその他のメッセージを表示します
-//   4. エラー一覧ウィンドウを使用してエラーを表示します
-//   5. [プロジェクト] > [新しい項目の追加] と移動して新しいコード ファイルを作成するか、[プロジェクト] > [既存の項目の追加] と移動して既存のコード ファイルをプロジェクトに追加します
-//   6. 後ほどこのプロジェクトを再び開く場合、[ファイル] > [開く] > [プロジェクト] と移動して .sln ファイルを選択します
