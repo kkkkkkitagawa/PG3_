@@ -1,21 +1,22 @@
-#include "Animal.h"
-#include "Cat.h"
-#include "Dog.h"
+#include "Circle.h"
+#include "IShape.h"
+#include "Rectangle.h"
 
 int main()
 {
-    Dog dog;
-    Cat cat;
+    Circle circle(5.0f);
+    Rectangle rectangle(4.0f, 6.0f);
 
-    Animal* animals[2] =
+    IShape* shapes[2] =
     {
-        &dog,
-        &cat
+        &circle,
+        &rectangle
     };
 
     for (int i = 0; i < 2; i++)
     {
-        animals[i]->MakeSound();
+        shapes[i]->Size();
+        shapes[i]->Draw();
     }
 
     return 0;
