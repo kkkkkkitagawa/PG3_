@@ -1,56 +1,34 @@
-#include <condition_variable>
-#include <functional>
+#include <chrono>
 #include <iostream>
-#include <latch>
-#include <mutex>
-#include <thread>
-
-constexpr int kThreadCount = 3;
-
-struct PrintOrder
-{
-    std::mutex mutex;
-    std::condition_variable condition;
-    int nextThreadNumber = 1;
-};
-
-void PrintThread(
-    const int threadNumber,
-    std::latch& startSignal,
-    PrintOrder& printOrder)
-{
-    // Wait until all three worker threads have been created.
-    startSignal.arrive_and_wait();
-
-    std::unique_lock lock(printOrder.mutex);
-    printOrder.condition.wait(
-        lock,
-        [&printOrder, threadNumber]()
-        {
-            return printOrder.nextThreadNumber == threadNumber;
-        });
-
-    std::cout << "thread " << threadNumber << '\n';
-    ++printOrder.nextThreadNumber;
-
-    lock.unlock();
-    printOrder.condition.notify_all();
-}
+#include <string>
+#include <utility>
 
 int main()
 {
-    std::latch startSignal(kThreadCount + 1);
-    PrintOrder printOrder;
+    // 1,000,000文字の'a'で初期化された文字列を作成する。
+    std::string a(1000000, 'a');
 
-    std::thread thread1(PrintThread, 1, std::ref(startSignal), std::ref(printOrder));
-    std::thread thread2(PrintThread, 2, std::ref(startSignal), std::ref(printOrder));
-    std::thread thread3(PrintThread, 3, std::ref(startSignal), std::ref(printOrder));
+    // 文字列aをコピーし、処理にかかった時間を計測する。
+    const auto copyStart = std::chrono::high_resolution_clock::now();
+    std::string b = a;
+    const auto copyEnd = std::chrono::high_resolution_clock::now();
 
-    startSignal.arrive_and_wait();
+    const auto copyTime =
+        std::chrono::duration_cast<std::chrono::microseconds>(copyEnd - copyStart);
 
-    thread1.join();
-    thread2.join();
-    thread3.join();
+    // std::moveでaを右辺値にキャストして移動し、処理時間を計測する。
+    const auto moveStart = std::chrono::high_resolution_clock::now();
+    std::string c = std::move(a);
+    const auto moveEnd = std::chrono::high_resolution_clock::now();
+
+    const auto moveTime =
+        std::chrono::duration_cast<std::chrono::microseconds>(moveEnd - moveStart);
+
+    std::cout << "1,000,000文字のstd::stringをコピーと移動で比較しました。\n";
+    std::cout << "コピー: " << copyTime.count() << " us\n";
+    std::cout << "移動  : " << moveTime.count() << " us\n";
+    std::cout << "コピー後の文字数: " << b.size() << '\n';
+    std::cout << "移動後の文字数  : " << c.size() << '\n';
 
     return 0;
 }
