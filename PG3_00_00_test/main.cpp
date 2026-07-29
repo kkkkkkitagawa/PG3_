@@ -5,10 +5,10 @@
 
 int main()
 {
-    // 1,000,000文字の'a'で初期化された文字列を作成する。
+    // 1,000,000文字の'a'で初期化された文字列を作成
     std::string a(1000000, 'a');
 
-    // 文字列aをコピーし、処理にかかった時間を計測する。
+    // 文字列aをコピーし、処理にかかった時間を計測
     const auto copyStart = std::chrono::high_resolution_clock::now();
     std::string b = a;
     const auto copyEnd = std::chrono::high_resolution_clock::now();
@@ -16,7 +16,7 @@ int main()
     const auto copyTime =
         std::chrono::duration_cast<std::chrono::microseconds>(copyEnd - copyStart);
 
-    // std::moveでaを右辺値にキャストして移動し、処理時間を計測する。
+    // std::moveでaを右辺値にキャストして移動し、処理時間を計測
     const auto moveStart = std::chrono::high_resolution_clock::now();
     std::string c = std::move(a);
     const auto moveEnd = std::chrono::high_resolution_clock::now();
